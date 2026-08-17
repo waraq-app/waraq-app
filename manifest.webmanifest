@@ -1,0 +1,15 @@
+{
+  "name": "ورق - مكتبة المعلم الرقمية",
+  "short_name": "ورق",
+  "description": "ملفات تعليمية رقمية للمعلم والمعلمة من متجر ورق.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F7F0E2",
+  "theme_color": "#365C4E",
+  "icons": [
+    {"src": "./icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
