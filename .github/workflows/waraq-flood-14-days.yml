@@ -1,0 +1,175 @@
+name: Waraq Flood Campaign 14 Days
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * *"
+      timezone: "Asia/Riyadh"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      CHAT_ID: "@waraqedu"
+      START_DATE: "2026-08-21"
+
+    steps:
+      - name: Publish Waraq campaign post
+        run: |
+          python3 - <<'PY'
+          import os
+          import datetime as dt
+          import urllib.parse
+          import urllib.request
+          from zoneinfo import ZoneInfo
+
+          tz = ZoneInfo("Asia/Riyadh")
+          today = dt.datetime.now(tz).date()
+          start = dt.date.fromisoformat(os.environ["START_DATE"])
+          day = (today - start).days
+
+          if not 0 <= day < 14:
+              print("Outside the 14-day campaign window. Nothing to publish.")
+              raise SystemExit(0)
+
+          messages = [
+              """🌊 بدأ طوفان ورق
+
+ملفات تعليمية جاهزة تختصر وقت الإعداد للمعلم والمعلمة.
+ابتدائي • متوسط • ثانوي • ملفات مهنية
+
+اختر مرحلتك وشاهد الملفات من صفحة واحدة:
+{link}""",
+
+              """📘 الصفوف الأولية
+
+قبل العلاج، نحتاج أن نعرف المهارة المتعثرة أولًا.
+تشخيص → تدخل علاجي → قياس أثر.
+
+ابدأ من هنا:
+{link}""",
+
+              """📚 الصفوف العليا 4–6
+
+قراءة وفهم وكتابة وعلاج ومتابعة في حزمة واحدة مرتبة للمعلم والطالب.
+
+شاهد التفاصيل:
+{link}""",
+
+              """✏️ لغتي الخالدة | أول متوسط
+
+من الكتاب إلى التطبيق:
+أوراق عمل + تشخيص + اختبارات + تحليل نتائج + علاج.
+
+شاهد الحزمة:
+{link}""",
+
+              """📗 لغتي الخالدة | ثاني متوسط
+
+لا تبدأ كل أسبوع من الصفر.
+اجمع التطبيق والقياس والعلاج في مسار واضح ومنظم.
+
+شاهد التفاصيل:
+{link}""",
+
+              """📙 لغتي الخالدة | ثالث متوسط
+
+أدوات صفية جاهزة حول الكتاب:
+أوراق عمل، اختبارات، تحليل نتائج وخطط علاجية.
+
+ابدأ من هنا:
+{link}""",
+
+              """🎓 الكفايات اللغوية 1-1 | أول ثانوي
+
+حقيبة معلم + مذكرة للطالب + تقويم ومتابعة.
+إعداد أسرع ومسار أوضح للحصة.
+
+شاهد التفاصيل:
+{link}""",
+
+              """🎓 الكفايات اللغوية 2-1 | ثاني ثانوي
+
+تحضير وشرح وتقويم ومتابعة في منظومة واحدة.
+
+شاهد الحقيبة:
+{link}""",
+
+              """🗂 ملف الإنجاز المهني
+
+ملف الإنجاز الجيد لا يجمع الأوراق فقط؛
+بل يربط الهدف بالإجراء والدليل والنتيجة والأثر.
+
+شاهد الملف:
+{link}""",
+
+              """📎 الشواهد المهنية
+
+الشاهد القوي يجيب بوضوح:
+ماذا نُفذ؟ لماذا؟ ماذا يثبت؟ وما الأثر؟
+
+شاهد الحقيبة:
+{link}""",
+
+              """🤝 مجتمع التعلم المهني
+
+حوّل اجتماع القسم من محضر عام إلى:
+مشكلة تعلم → بيانات → قرار → تنفيذ → قياس أثر.
+
+شاهد الملف:
+{link}""",
+
+              """📊 التشخيص والعلاج والإثراء
+
+قبل أن تعالج الضعف:
+حدّد المهارة ونمط الخطأ، ثم اختر التدخل المناسب وأعد القياس.
+
+شاهد التفاصيل:
+{link}""",
+
+              """🌿 اختر مرحلتك
+
+لا تعرف أي ملف يناسبك؟
+لا تحتاج المرور على كل المنتجات.
+
+اختر مرحلتك فقط، وستجد الملفات مرتبة أمامك:
+{link}""",
+
+              """🌊 ختام طوفان ورق
+
+ورق ليس مجموعة ملفات مبعثرة؛
+بل مكتبة تعليمية مرتبة حسب المرحلة والاحتياج.
+
+اختر ما تحتاجه فقط:
+{link}""",
+          ]
+
+          link = (
+              "https://waraq-app.github.io/waraq-app/flood.html"
+              f"?utm_source=telegram&utm_medium=organic"
+              f"&utm_campaign=waraq_flood&utm_content=day{day + 1}"
+          )
+
+          text = messages[day].replace("{link}", link)
+          token = "".join(os.environ["BOT_TOKEN"].split())
+
+          if not token:
+              raise SystemExit("TELEGRAM_BOT_TOKEN is empty.")
+
+          payload = urllib.parse.urlencode(
+              {
+                  "chat_id": os.environ["CHAT_ID"],
+                  "text": text,
+              }
+          ).encode("utf-8")
+
+          request = urllib.request.Request(
+              f"https://api.telegram.org/bot{token}/sendMessage",
+              data=payload,
+              method="POST",
+          )
+
+          with urllib.request.urlopen(request, timeout=30) as response:
+              print(response.read().decode("utf-8"))
+          PY
