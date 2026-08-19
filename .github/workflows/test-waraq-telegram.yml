@@ -12,8 +12,15 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
+          CLEAN_TOKEN="$(printf '%s' "$BOT_TOKEN" | tr -d '[:space:]')"
+
+          if [ -z "$CLEAN_TOKEN" ]; then
+            echo "Telegram token is empty"
+            exit 1
+          fi
+
           curl --fail --silent --show-error \
             --request POST \
-            "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            "https://api.telegram.org/bot${CLEAN_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=@waraqedu" \
             --data-urlencode "text=تم ربط بوت ورق بنجاح"
